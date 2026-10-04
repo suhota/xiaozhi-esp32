@@ -14,21 +14,22 @@ jobs:
     name: Build bread-compact-esp32
     runs-on: ubuntu-latest
     container:
-      image: espressif/idf:v6.1
+      image: espressif/idf:v5.3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build current variant
+      - name: Build and Merge Binary
         shell: bash
         run: |
           source "$IDF_PATH/export.sh"
-          python -m pip install --upgrade idf-component-manager
           python scripts/build.py bread-compact-esp32 --name bread-compact-esp32
+          # সবগুলোকে একসাথে জুড়ে 0x0 অ্যাড্রেসের কমপ্লিট বাইনারি তৈরি
+          esptool.py --chip esp32s3 merge_bin -o full-firmware.bin @build/bread-compact-esp32/flash_args || esptool.py --chip esp32s3 merge_bin -o full-firmware.bin @build/flash_args
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: xiaozhi_bread-compact-esp32_${{ github.sha }}
-          path: build/merged-binary.bin
+          name: xiaozhi_full_firmware_${{ github.sha }}
+          path: full-firmware.bin
           if-no-files-found: error
