@@ -29,7 +29,13 @@
 #define DISPLAY_SDA_PIN         GPIO_NUM_8
 #define DISPLAY_SCL_PIN         GPIO_NUM_9
 #define DISPLAY_WIDTH           128
-#define DISPLAY_HEIGHT          64
+#if CONFIG_OLED_SSD1306_128X32
+#define DISPLAY_HEIGHT  32
+#elif CONFIG_OLED_SSD1306_128X64 || CONFIG_OLED_SH1106_128X64
+#define DISPLAY_HEIGHT  64
+#else
+#define DISPLAY_HEIGHT  64
+#endif
 
 #define DISPLAY_MIRROR_X        false
 #define DISPLAY_MIRROR_Y        false
