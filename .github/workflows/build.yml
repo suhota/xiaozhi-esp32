@@ -14,7 +14,7 @@ jobs:
     name: Build bread-compact-esp32
     runs-on: ubuntu-latest
     container:
-      image: espressif/idf:v5.3
+      image: espressif/idf:v6.1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,8 +24,15 @@ jobs:
         run: |
           source "$IDF_PATH/export.sh"
           python scripts/build.py bread-compact-esp32 --name bread-compact-esp32
-          # সবগুলোকে একসাথে জুড়ে 0x0 অ্যাড্রেসের কমপ্লিট বাইনারি তৈরি
-          esptool.py --chip esp32s3 merge_bin -o full-firmware.bin @build/bread-compact-esp32/flash_args || esptool.py --chip esp32s3 merge_bin -o full-firmware.bin @build/flash_args
+          
+          # 0x0 অ্যাড্রেসের স্বয়ংসম্পূর্ণ ফ্ল্যাশ ফাইল তৈরি
+          if [ -f build/bread-compact-esp32/flash_args ]; then
+            cd build/bread-compact-esp32 && esptool.py --chip esp32s3 merge_bin -o ../../full-firmware.bin @flash_args && cd ../..
+          elif [ -f build/flash_args ]; then
+            cd build && esptool.py --chip esp32s3 merge_bin -o ../full-firmware.bin @flash_args && cd ..
+          elif [ -f build/merged-binary.bin ]; then
+            cp build/merged-binary.bin full-firmware.bin
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
