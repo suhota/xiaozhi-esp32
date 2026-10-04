@@ -23,7 +23,8 @@ jobs:
         shell: bash
         run: |
           source "$IDF_PATH/export.sh"
-          python scripts/build.py bread-compact-esp32 --name bread-compact-esp32
+          python -m pip install --upgrade idf-component-manager
+          python scripts/build.py bread-compact-esp32 --name bread-compact-esp32 --target esp32s3
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
